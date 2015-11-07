@@ -28,6 +28,17 @@ var serialport = new SerialPort("/dev/ttyAMA0", {
   xbeeAPI.on("frame_object", function (frame) {
 
   //console.log("FULL FRAME:", frame);
+  //Creamos el frame para dormir el modulo
+  var sleep_frame_obj =
+    {
+      type: 0x17, // xbee_api.constants.FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST
+      //id: 0x01, // optional, nextFrameId() is called per default
+      destination64: frame.remote64,
+      //destination16: "fffe", // optional, "fffe" is default
+      remoteCommandOptions: 0x02, // optional, 0x02 is default
+      command: "SI",
+      commandParameter: [] // Can either be string or byte array.
+    }
 
   //Vamos a ver que tipo de datos vienen en el buffer
   try {
@@ -73,6 +84,10 @@ var serialport = new SerialPort("/dev/ttyAMA0", {
 
          //Enviamos el frame JSON al Broker MQTT
          client.publish('technetium/test/parking', JSON.stringify(parkingJSON));
+
+         //Dormimos el dispositivo Xbee
+         serialport.write(xbeeAPI.buildFrame(sleep_frame_obj));
+
       break;
     }
 
@@ -80,10 +95,5 @@ var serialport = new SerialPort("/dev/ttyAMA0", {
     //console.log("NO DATA");
     //console.log(e);
   }
-
-
-
-
-
 
   });
