@@ -21,31 +21,32 @@ var serialport = new SerialPort("/dev/ttyAMA0", {
 });
 
   serialport.on('data', function (data) {
-      console.log('data received: ' + data);
+      //console.log('data received: ' + data);
   });
 
   // All frames parsed by the XBee will be emitted here
   xbeeAPI.on("frame_object", function (frame) {
 
-  console.log("FULL FRAME:", frame);
+  //console.log("FULL FRAME:", frame);
 
   //Vamos a ver que tipo de datos vienen en el buffer
   try {
     dataTypeBuffer = new Buffer(frame.data.slice(0,2));
-    dataType = xBuffer.readInt16BE(0);
+    dataType = dataTypeBuffer.readInt16BE(0);
 
     switch (dataType) {
       case 100: //Es del tipo parking
-        xBuffer = new Buffer(frame.data.slice(0,2));
+        xBuffer = new Buffer(frame.data.slice(2,4));
         x = xBuffer.readInt16BE(0);
-        yBuffer = new Buffer(frame.data.slice(4,6));
+        yBuffer = new Buffer(frame.data.slice(6,8));
         y = yBuffer.readInt16BE(0);
-        zBuffer = new Buffer(frame.data.slice(2,4));
+        zBuffer = new Buffer(frame.data.slice(4,6));
         z = zBuffer.readInt16BE(0);
-        tempBuffer = new Buffer(frame.data.slice(6,7));
+        tempBuffer = new Buffer(frame.data.slice(8,9));
         temperatureRaw = tempBuffer.readUInt8(0)
 
         console.log('Parking');
+        console.log(new Date().toString());
         console.log('x:' + x);
         console.log('y:' + y);
         console.log('z:' + z);
@@ -76,7 +77,8 @@ var serialport = new SerialPort("/dev/ttyAMA0", {
     }
 
   } catch(e) {
-    console.log("NO DATA");
+    //console.log("NO DATA");
+    //console.log(e);
   }
 
 
