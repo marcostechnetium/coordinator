@@ -28,23 +28,23 @@ var serialport = new SerialPort("/dev/ttyAMA0", {
   xbeeAPI.on("frame_object", function (frame) {
 
   //console.log("FULL FRAME:", frame);
+
   //Creamos el frame para dormir el modulo
   var sleep_frame_obj =
     {
       type: 0x17, // xbee_api.constants.FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST
-      //id: 0x01, // optional, nextFrameId() is called per default
       destination64: frame.remote64,
-      //destination16: "fffe", // optional, "fffe" is default
       remoteCommandOptions: 0x02, // optional, 0x02 is default
       command: "SI",
       commandParameter: [] // Can either be string or byte array.
     }
 
-  //Vamos a ver que tipo de datos vienen en el buffer
+  //Procesamos el mensaje recibido
   try {
     dataTypeBuffer = new Buffer(frame.data.slice(0,2));
     dataType = dataTypeBuffer.readInt16BE(0);
 
+    //Vemos de que tipo es el buffer para procesarlo
     switch (dataType) {
       case 100: //Es del tipo parking
         xBuffer = new Buffer(frame.data.slice(2,4));
