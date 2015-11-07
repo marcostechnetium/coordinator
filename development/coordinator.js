@@ -86,7 +86,7 @@ var serialport = new SerialPort("/dev/ttyAMA0", {
          client.publish('technetium/test/parking', JSON.stringify(parkingJSON));
 
          //Dormimos el dispositivo Xbee
-         serialport.write(xbeeAPI.buildFrame(sleep_frame_obj));
+         //serialport.write(xbeeAPI.buildFrame(sleep_frame_obj));
 
       break;
     }
