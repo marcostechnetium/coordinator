@@ -72,7 +72,7 @@ var serialport = new SerialPort("/dev/ttyAMA0", {
      client.publish('technetium/test/parking', JSON.stringify(parkingJSON));
 
   } catch(e) {
-    console.log("NO DATA");
+    //console.log("NO DATA");
   }
 
   });
