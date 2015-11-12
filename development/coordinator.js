@@ -27,25 +27,16 @@ var serialport = new SerialPort("/dev/ttyAMA0", {
   // All frames parsed by the XBee will be emitted here
   xbeeAPI.on("frame_object", function (frame) {
 
-  //console.log("FULL FRAME:", frame);
-
-  //Creamos el frame para dormir el modulo
-  var sleep_frame_obj =
-    {
-      type: 0x17, // xbee_api.constants.FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST
-      destination64: frame.remote64,
-      remoteCommandOptions: 0x02, // optional, 0x02 is default
-      command: "SI",
-      commandParameter: [] // Can either be string or byte array.
-    }
+  console.log("FULL FRAME:", frame);
 
   //Procesamos el mensaje recibido
   try {
-    dataTypeBuffer = new Buffer(frame.data.slice(0,2));
-    dataType = dataTypeBuffer.readInt16BE(0);
+    //Tomamos el header del buffer
+    measuresTypeBuffer = new Buffer(frame.data.slice(0,2));
+    measuresType = measuresTypeBuffer.readInt16BE(0);
 
     //Vemos de que tipo es el buffer para procesarlo
-    switch (dataType) {
+    switch (measuresType) {
       case 100: //Es del tipo parking
         xBuffer = new Buffer(frame.data.slice(2,4));
         x = xBuffer.readInt16BE(0);
@@ -56,19 +47,21 @@ var serialport = new SerialPort("/dev/ttyAMA0", {
         tempBuffer = new Buffer(frame.data.slice(8,9));
         temperatureRaw = tempBuffer.readUInt8(0)
 
+/*
         console.log('Parking');
         console.log(new Date().toString());
         console.log('x:' + x);
         console.log('y:' + y);
         console.log('z:' + z);
         console.log('temp:' + temperatureRaw);
+*/
 
         //Creamos el objeto JSON
         var parkingJSON =
         { "device" :
            {
              "zigbeeId" : frame.remote64,
-             "deviceType" : "Parking",
+             "measuresType" : "100.Parking",
              "measures" :
              {
                "magnetic" :
@@ -85,15 +78,12 @@ var serialport = new SerialPort("/dev/ttyAMA0", {
          //Enviamos el frame JSON al Broker MQTT
          client.publish('technetium/test/parking', JSON.stringify(parkingJSON));
 
-         //Dormimos el dispositivo Xbee
-         //serialport.write(xbeeAPI.buildFrame(sleep_frame_obj));
-
       break;
     }
 
   } catch(e) {
     //console.log("NO DATA");
-    //console.log(e);
+    console.log(e);
   }
 
   });
